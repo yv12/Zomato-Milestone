@@ -403,25 +403,23 @@ def render_search_form():
     cuisines = get_cuisines()
 
     # Location
-    loc_idx = 0
-    if "pref_location" in st.session_state and st.session_state["pref_location"] in locations:
-        loc_idx = locations.index(st.session_state["pref_location"])
+    if st.session_state.get("pref_location") not in locations:
+        default_loc = "Koramangala" if "Koramangala" in locations else (locations[0] if locations else "")
+        st.session_state["pref_location"] = default_loc
     location = st.selectbox(
         "📍 Where are you looking?",
         options=locations,
-        index=loc_idx,
-        key="widget_location",
+        key="pref_location",
     )
 
     # Cuisine
-    cui_idx = 0
-    if "pref_cuisine" in st.session_state and st.session_state["pref_cuisine"] in cuisines:
-        cui_idx = cuisines.index(st.session_state["pref_cuisine"])
+    if st.session_state.get("pref_cuisine") not in cuisines:
+        default_cui = "North Indian" if "North Indian" in cuisines else (cuisines[0] if cuisines else "")
+        st.session_state["pref_cuisine"] = default_cui
     cuisine = st.selectbox(
         "🍽️ Cuisine or Dish",
         options=cuisines,
-        index=cui_idx,
-        key="widget_cuisine",
+        key="pref_cuisine",
     )
 
     # Quick cuisine pills
@@ -438,51 +436,42 @@ def render_search_form():
                 st.rerun()
 
     # Budget
-    budget_options = {"Low": "low", "Medium": "medium", "High": "high"}
-    default_budget = st.session_state.get("pref_budget", "medium")
-    default_idx = list(budget_options.values()).index(default_budget) if default_budget in budget_options.values() else 1
-    budget_label = st.radio(
+    budget = st.radio(
         "💰 Budget",
-        options=list(budget_options.keys()),
-        index=default_idx,
+        options=["low", "medium", "high"],
+        format_func=lambda x: x.capitalize(),
+        key="pref_budget",
         horizontal=True,
-        key="widget_budget",
     )
-    budget = budget_options[budget_label]
 
     # Min Rating
-    default_rating = st.session_state.get("pref_min_rating", 4.0)
     min_rating = st.slider(
         "⭐ Minimum Rating",
         min_value=3.0,
         max_value=5.0,
-        value=float(default_rating),
         step=0.1,
         format="%.1f",
-        key="widget_rating",
+        key="pref_min_rating",
     )
 
     # Top N
-    default_topn = st.session_state.get("pref_top_n", 5)
     top_n = st.slider(
         "🍽️ How many recommendations?",
         min_value=1,
         max_value=5,
-        value=int(default_topn),
         step=1,
-        key="widget_topn",
+        key="pref_top_n",
     )
 
     # Additional vibes
-    default_vibes = st.session_state.get("pref_additional", "")
     additional = st.text_input(
         "✨ Any specific vibes?",
-        value=default_vibes,
         placeholder="e.g. cozy rooftop ambience, authentic handmade pasta...",
-        key="widget_additional",
+        key="pref_additional",
     )
 
     return location, cuisine, budget, min_rating, top_n, additional
+
 
 
 def render_result_card(rec_detail, rank: int, is_top: bool):
@@ -632,11 +621,16 @@ def run_search(location, cuisine, budget, min_rating, top_n, additional):
 # 11. MAIN APP LAYOUT
 # ---------------------------------------------------------------------------
 def main():
+    locations = get_locations()
+    cuisines = get_cuisines()
+    default_loc = "Koramangala" if "Koramangala" in locations else (locations[0] if locations else "")
+    default_cui = "North Indian" if "North Indian" in cuisines else (cuisines[0] if cuisines else "")
+
     # Initialise session state defaults
     defaults = {
         "screen": "SEARCH",
-        "pref_location": "",
-        "pref_cuisine": "",
+        "pref_location": default_loc,
+        "pref_cuisine": default_cui,
         "pref_budget": "medium",
         "pref_min_rating": 4.0,
         "pref_top_n": 5,
