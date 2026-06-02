@@ -306,14 +306,16 @@
         return () => document.removeEventListener("mousedown", handleClickOutside);
       }, []);
 
+      const safeOptions = Array.isArray(options) ? options : [];
+
       const filtered = React.useMemo(() => {
         if (!searchQuery) {
-          return options;
+          return safeOptions;
         }
-        return options.filter(opt =>
-          opt.toLowerCase().includes(searchQuery.toLowerCase())
+        return safeOptions.filter(opt =>
+          typeof opt === 'string' && opt.toLowerCase().includes(searchQuery.toLowerCase())
         );
-      }, [searchQuery, options]);
+      }, [searchQuery, safeOptions]);
 
       const handleInputChange = (e) => {
         const val = e.target.value;
@@ -327,6 +329,8 @@
         onChange(opt);
         setIsOpen(false);
       };
+
+      const safeFiltered = Array.isArray(filtered) ? filtered : [];
 
       return (
         <div ref={containerRef} className="flex flex-col gap-stack-sm relative w-full">
@@ -369,8 +373,8 @@
           {isOpen && (
             <div className="absolute top-[72px] left-0 w-full bg-[#0e1111] border border-[#2a2a30] rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
               <ul className="max-h-[294px] overflow-y-auto custom-scrollbar p-1">
-                {filtered.map((opt) => {
-                  const isSelected = opt.toLowerCase() === value?.toLowerCase();
+                {safeFiltered.map((opt) => {
+                  const isSelected = typeof opt === 'string' && typeof value === 'string' && opt.toLowerCase() === value.toLowerCase();
                   return (
                     <li key={opt}>
                       <button
@@ -392,7 +396,7 @@
                     </li>
                   );
                 })}
-                {filtered.length === 0 && (
+                {safeFiltered.length === 0 && (
                   <li className="px-4 py-4 text-center text-body-md text-on-surface-variant/50 italic">
                     Type something else to search...
                   </li>
@@ -431,14 +435,20 @@
       // Fetch autocompletions metadata on mount
       useEffect(() => {
         fetch(`${API_BASE}/api/v1/metadata/locations`)
-          .then(res => res.json())
-          .then(data => setLocationsList(data))
-          .catch(e => console.error("Failed to load locations", e));
+          .then(res => res.ok ? res.json() : [])
+          .then(data => setLocationsList(Array.isArray(data) ? data : []))
+          .catch(e => {
+            console.error("Failed to load locations", e);
+            setLocationsList([]);
+          });
 
         fetch(`${API_BASE}/api/v1/metadata/cuisines`)
-          .then(res => res.json())
-          .then(data => setCuisinesList(data))
-          .catch(e => console.error("Failed to load cuisines", e));
+          .then(res => res.ok ? res.json() : [])
+          .then(data => setCuisinesList(Array.isArray(data) ? data : []))
+          .catch(e => {
+            console.error("Failed to load cuisines", e);
+            setCuisinesList([]);
+          });
       }, []);
 
       // Timed Rotating Loading Messages
