@@ -1,0 +1,34 @@
+Problem Statement: Single-Screen Context-Aware Restaurant Discovery Engine
+1. Objective
+Build a lightweight, zero-scroll, single-screen web application that captures explicit user preference inputs in a strict, sequential hierarchy. The system processes user queries using a local Hugging Face embedding pipeline to perform semantic search against a targeted Hugging Face dataset, dynamically rendering the final AI-ranked results within a responsive, self-adjusting card layout completely contained inside a single screen's viewport.
+2. System Workflow
+A. Data Ingestion
+Dataset Sourcing: Dynamically load and preprocess the hosted Zomato dataset directly from the Hugging Face repository: ManikaSaini/zomato-restaurant-recommendation.
+Field Extraction: Parse and extract target semantic and metadata fields from the dataset, strictly capturing: Restaurant Name, Location, Cuisine, Cost, Rating, and raw text features for recommendation context.
+Local Embedding Generation: Utilize a local Hugging Face model/tokenizer pipeline (e.g., transformers) to generate dense vector representations of the text fields locally, ensuring no external data transfer.
+B. User Input (Sequential Constraints)
+The user interface captures preferences in a strict, top-down dependent hierarchy to narrow down the search space systematically:
+Location: Primary boundary filter (e.g., Delhi, Bangalore).
+Cuisine: Secondary sub-filter matching culinary types (e.g., Italian, Chinese).
+Minimum Rating: Tertiary quality threshold filter (Numeric Float).
+Budget / Target Scale: Financial boundary classification (low, medium, high).
+Additional Preferences: Optional semantic nuances (e.g., family-friendly, quick service).
+Capacity Limit ($N$): Number of requested recommendations, bound by a strict range constraint where $1 \le N \le 10$.
+C. Integration Layer
+State Filtering: Execute programmatic and vector database queries using the hierarchical input state (Location -> Cuisine -> Rating) to isolate the candidate restaurant pool.
+Deterministic Capacity Control: Apply a strict LIMIT N constraint on data retrieval to align with the user's requested capacity, preventing context window bloat.
+Prompt Augmentation: Package the extracted raw structured text data (not raw embeddings) and the user's query into a structured context template to feed directly into the LLM context window.
+D. Recommendation Engine
+Contextual Reasoning: Pass the augmented prompt to the LLM to analyze the retrieved context against the user's specific inputs.
+Ranking & Summarization: Leverage the LLM to rank the top $N$ options deterministically and synthesize the reasoning behind why each specific restaurant matches the requested criteria.
+E. Output Display (Viewport Constraints)
+Zero-Scroll Mandate: The entire interface must be completely contained within $100\text{vh}$ (viewport height) and $100\text{vw}$ (viewport width). The user must never be required to scroll to input data or view results.
+Dynamic Card-Style Layout: Render the final output payload as distinct UI cards that programmatically adjust their dimensions based on the value of $N$.
+Responsive Screen Fitting: If $N=1$, a single card optimizes to fill the viewport layout; if $N=10$, a multi-row/multi-column grid scales down the individual card components to guarantee all 10 fit simultaneously on the screen without triggering a scrollbar.
+Card Metadata Fields: Each rendered card must explicitly display:
+Restaurant Name
+Cuisine
+Rating
+Estimated Cost
+AI-Generated Explanation (Why it fits the user profile)
+

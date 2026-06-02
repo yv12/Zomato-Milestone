@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>TasteFinder AI - Zomato</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  
+  <!-- Google Fonts & Material Symbols -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+  
+  <!-- React & ReactDOM (UMD production versions) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel Standalone for browser-side JSX rendering -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Tailwind Config Customizations matching Urban Harvest -->
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-lowest": "#0e1111",
+            "on-secondary-container": "#b5b5be",
+            "surface-container-highest": "#0e1111",
+            "on-surface": "#f0ece8",
+            "on-primary": "#ffffff",
+            "background": "#0e1111",
+            "tertiary-fixed": "#0e1111",
+            "on-primary-fixed-variant": "#ffffff",
+            "on-secondary-fixed-variant": "#b5b5be",
+            "on-primary-container": "#ffc8c8",
+            "secondary-fixed": "#0e1111",
+            "secondary-fixed-dim": "#0e1111",
+            "surface-tint": "#8B0000",
+            "tertiary-fixed-dim": "#0e1111",
+            "on-secondary": "#0e1111",
+            "surface-container-low": "#0e1111",
+            "primary-container": "#2a0000",
+            "inverse-surface": "#fafaf8",
+            "on-tertiary-container": "#f0ece8",
+            "primary-fixed": "#1f0000",
+            "inverse-primary": "#c0392b",
+            "secondary": "#b5b5be",
+            "surface": "#0e1111",
+            "primary-fixed-dim": "#330000",
+            "surface-dim": "#0e1111",
+            "on-surface-variant": "#b5b5be",
+            "error-container": "#3d0000",
+            "on-secondary-fixed": "#f0ece8",
+            "surface-container": "#0e1111",
+            "surface-bright": "#0e1111",
+            "on-error": "#ffffff",
+            "on-error-container": "#ffc8c8",
+            "on-tertiary-fixed-variant": "#b5b5be",
+            "on-background": "#f0ece8",
+            "on-tertiary": "#f0ece8",
+            "secondary-container": "#0e1111",
+            "tertiary": "#b5b5be",
+            "on-tertiary-fixed": "#f0ece8",
+            "error": "#8B0000",
+            "surface-variant": "#0e1111",
+            "tertiary-container": "#0e1111",
+            "outline": "#2a2a30",
+            "outline-variant": "#38383f",
+            "surface-container-high": "#0e1111",
+            "on-primary-fixed": "#8B0000",
+            "primary": "#8B0000",
+            "inverse-on-surface": "#0e1111",
+            "gold-accent": "#d4a825"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.375rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "container-max": "1280px",
+            "margin-mobile": "16px",
+            "stack-xl": "64px",
+            "stack-lg": "32px",
+            "margin-desktop": "40px",
+            "gutter": "24px",
+            "stack-sm": "8px",
+            "stack-md": "16px"
+          },
+          "fontFamily": {
+            "hero-lg": ["Inter"],
+            "section-title-mobile": ["Inter"],
+            "hero-lg-mobile": ["Inter"],
+            "card-title": ["Inter"],
+            "section-title": ["Inter"],
+            "body-md": ["Inter"],
+            "label-sm": ["Inter"],
+            "body-lg": ["Inter"]
+          },
+          "fontSize": {
+            "hero-lg": ["64px", {"lineHeight": "72px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "section-title-mobile": ["28px", {"lineHeight": "34px", "fontWeight": "700"}],
+            "hero-lg-mobile": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+            "card-title": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+            "section-title": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+            "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "label-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500"}],
+            "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #0e1111; color: #f0ece8; }
+    
+    .shadow-ambient { box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45); }
+    .shadow-hover:hover { box-shadow: 0 12px 40px rgba(139, 0, 0, 0.25), 0 0 16px rgba(212, 168, 37, 0.15); transform: translateY(-4px); }
+    .rounded-card { border-radius: 20px; }
+    .input-radius { border-radius: 8px; }
+    .chip-radius { border-radius: 6px; }
+    select {
+      background-image: none !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+    }
+    
+    /* Shimmer Skeleton styling */
+    .shimmer-wrapper {
+      position: relative;
+      overflow: hidden;
+      background-color: #1a1d1d;
+    }
+    
+    .shimmer-wrapper::after {
+      position: absolute;
+      top: 0; right: 0; bottom: 0; left: 0;
+      transform: translateX(-100%);
+      background-image: linear-gradient(
+        90deg,
+        rgba(212, 168, 37, 0) 0,
+        rgba(212, 168, 37, 0.04) 20%,
+        rgba(212, 168, 37, 0.10) 60%,
+        rgba(212, 168, 37, 0)
+      );
+      animation: shimmer-anim 2s infinite;
+      content: '';
+    }
+    
+    @keyframes shimmer-anim {
+      100% { transform: translateX(100%); }
+    }
+    
+    /* Hide scrollbars for filter slider bar */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0e1111;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #38383f;
+      border-radius: 3px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #d4a825;
+    }
+
+    /* Slider styling - proper thumb alignment */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      background: #2a2a30;
+      border-radius: 3px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #8B0000;
+      border: 2px solid #d4a825;
+      box-shadow: 0 0 6px rgba(139, 0, 0, 0.5);
+      cursor: pointer;
+      margin-top: -5px;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 6px;
+      background: #2a2a30;
+      border-radius: 3px;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #8B0000;
+      border: 2px solid #d4a825;
+      box-shadow: 0 0 6px rgba(139, 0, 0, 0.5);
+      cursor: pointer;
+    }
+    input[type="range"]::-moz-range-track {
+      height: 6px;
+      background: #2a2a30;
+      border-radius: 3px;
+    }
+
+    /* High-Density Responsive Search Form layout rules */
+    .search-card-fit {
+      max-height: calc(100vh - 140px) !important;
+      overflow-y: auto !important;
+      zoom: 0.95;
+    }
+    
+    @media (min-width: 1024px) {
+      .results-container-fit {
+        zoom: 0.95;
+      }
+    }
+    
+    @media (max-height: 900px) {
+      .search-card-fit {
+        padding: 1rem !important;
+      }
+      .search-form-fit {
+        gap: 0.5rem !important;
+      }
+      .search-input-fit {
+        padding-top: 0.35rem !important;
+        padding-bottom: 0.35rem !important;
+        min-height: 36px !important;
+      }
+      .search-btn-fit {
+        min-height: 38px !important;
+        height: 38px !important;
+        margin-top: 0.25rem !important;
+      }
+      .search-preset-fit {
+        margin-top: 0.4rem !important;
+        padding-top: 0.4rem !important;
+      }
+      .preset-btn-fit {
+        padding: 0.3rem 0.5rem !important;
+      }
+      .search-cuisine-chips {
+        margin-top: 0.25rem !important;
+        gap: 0.25rem !important;
+      }
+      .search-cuisine-chips button {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 11px !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+  <!-- Mount point for React -->
+  <div id="root" class="flex-grow flex flex-col"></div>
+
+  <!-- React Code Implementation -->
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Premium food photography selection mapping
+    const getCuisineImage = (cuisines = []) => {
+      const list = cuisines.map(c => c.toLowerCase());
+      if (list.includes('pizza') || list.includes('italian')) {
+        return "https://lh3.googleusercontent.com/aida-public/AB6AXuA55ozOycurOiy5kVz0amfXraAEVUxZFTIWhLRrL5_0kb3c94npYBW6fXUlHeu59NgrK3Ifr8uN_14Mj0BuzAsA5wGPmxqB4tbo1RAr3ZF1nnOSOr7AoqtLay1plc8pyRm68J5Cwzv7rN0hRNJ-AENrJyGkzyQzjvV703PpVtVpt2vGrUN1XZXxrVCBwFGY0kh1b-G40NH5v6FpL08uFJ0UYrQWl9Wt7rHi9bKrL4kdK8ZMXOjRrc0cVEau5M03JVWpScCYGM-Hu2s";
+      }
+      if (list.includes('cafe') || list.includes('desserts') || list.includes('ice cream')) {
+        return "https://lh3.googleusercontent.com/aida-public/AB6AXuAzwM4hLxcvHB3_HSuqxoMkAl_IK4ptjITsrrzvjeeKfIbgdRifgCJGkR7V-Oyepn0sTOJ5eNL6c7PQjpZD_JWazbedt6fDOZTtgVPS01vOFZK0cg1t62uN9UBdXMR0_LQPpyvfmrWtv-ec3PQNHXVwyuCJpPt_z09GboCdewPA7wEyax7zQf4olBnpugbH_YGHyPbn4eqLaOTT2SW8ykVczVrNI3lK1LulKaONxW2G_s2IeGX-zF8vQ17-H39GjoogLFfyX8towH0";
+      }
+      return "https://lh3.googleusercontent.com/aida-public/AB6AXuDFxVJLcQ30mUJaCeRl1BQOfAs8rkLiKae5K4X7U7dSnwFZ6B-syvr4XJka6HLwPxhDQoizExKgRdC5GfAwwVmQ_7DmsLGQdea6dtImYYd84SvKuMZoY7HQMVpsokE-IqhGJixen0m0rRpG1i7hC6nq2Omq5uymM9Klm9A_JNlorBfaQQgsY2ScbiPNm6l8dS2JF6I0hqZ2zRzMF3HQDIycClLJSAl1Ls7IH0V-wrH8ewteEdEv94PCrIxRbxQuByx3eSgKc03Qy5Y";
+    };
+
+    function SearchableDropdown({ label, value, onChange, options = [], placeholder, icon }) {
+      const [isOpen, setIsOpen] = useState(false);
+      const [searchQuery, setSearchQuery] = useState(value || '');
+      const containerRef = React.useRef(null);
+
+      // Sync with parent value updates (e.g. when presets are selected)
+      useEffect(() => {
+        setSearchQuery(value || '');
+      }, [value]);
+
+      // Click outside to close dropdown
+      useEffect(() => {
+        function handleClickOutside(event) {
+          if (containerRef.current && !containerRef.current.contains(event.target)) {
+            setIsOpen(false);
+          }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+      }, []);
+
+      const filtered = React.useMemo(() => {
+        if (!searchQuery) {
+          return options;
+        }
+        return options.filter(opt =>
+          opt.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+      }, [searchQuery, options]);
+
+      const handleInputChange = (e) => {
+        const val = e.target.value;
+        setSearchQuery(val);
+        onChange(val);
+        setIsOpen(true);
+      };
+
+      const handleSelectOption = (opt) => {
+        setSearchQuery(opt);
+        onChange(opt);
+        setIsOpen(false);
+      };
+
+      return (
+        <div ref={containerRef} className="flex flex-col gap-stack-sm relative w-full">
+          <label className="font-label-sm text-label-sm text-on-surface font-semibold flex items-center justify-between">
+            <span>{label}</span>
+            {searchQuery && (
+              <button 
+                type="button" 
+                onClick={() => { setSearchQuery(''); onChange(''); }}
+                className="text-[11px] text-primary hover:underline font-bold tracking-wide uppercase"
+              >
+                Clear
+              </button>
+            )}
+          </label>
+          <div className="relative">
+            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary z-10 pointer-events-none" style={{fontVariationSettings: "'FILL' 1"}}>
+              {icon}
+            </span>
+             <input 
+              type="text"
+              value={searchQuery}
+              onFocus={() => setIsOpen(true)}
+              onChange={handleInputChange}
+              placeholder={placeholder}
+              className="w-full input-radius border border-[#2a2a30] bg-[#0e1111] pl-12 pr-10 py-2 search-input-fit font-body-md text-body-md text-on-surface focus:border-[#d4a825] focus:ring-1 focus:ring-[#d4a825]/50 outline-none transition-colors placeholder:text-white/50 font-medium"
+            />
+            <button
+              type="button"
+              onClick={() => setIsOpen(!isOpen)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center p-1"
+            >
+              <span className="material-symbols-outlined transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0)' }}>
+                expand_more
+              </span>
+            </button>
+          </div>
+
+          {/* Floating Dropdown List */}
+          {isOpen && (
+            <div className="absolute top-[72px] left-0 w-full bg-[#0e1111] border border-[#2a2a30] rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+              <ul className="max-h-[294px] overflow-y-auto custom-scrollbar p-1">
+                {filtered.map((opt) => {
+                  const isSelected = opt.toLowerCase() === value?.toLowerCase();
+                  return (
+                    <li key={opt}>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectOption(opt)}
+                        className={`w-full text-left px-4 py-2 text-body-md font-medium transition-all flex items-center justify-between ${
+                          isSelected 
+                            ? 'bg-primary text-white font-bold shadow-md shadow-primary/10' 
+                            : 'text-on-surface-variant hover:bg-primary/10 hover:text-primary'
+                        }`}
+                      >
+                        <span>{opt}</span>
+                        {isSelected && (
+                          <span className="material-symbols-outlined text-[16px]" style={{fontVariationSettings: "'FILL' 1"}}>
+                            check_circle
+                          </span>
+                        )}
+                      </button>
+                    </li>
+                  );
+                })}
+                {filtered.length === 0 && (
+                  <li className="px-4 py-4 text-center text-body-md text-on-surface-variant/50 italic">
+                    Type something else to search...
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    function App() {
+      // States
+      const [screenState, setScreenState] = useState('SEARCH'); // SEARCH, LOADING, RESULTS, EMPTY, ERROR
+      const [locationsList, setLocationsList] = useState([]);
+      const [cuisinesList, setCuisinesList] = useState([]);
+      
+      // Preference inputs
+      const [prefLocation, setPrefLocation] = useState('');
+      const [prefCuisine, setPrefCuisine] = useState('');
+      const [prefBudget, setPrefBudget] = useState('medium');
+      const [prefMinRating, setPrefMinRating] = useState(4.0);
+      const [prefAdditional, setPrefAdditional] = useState('');
+      const [prefTopN, setPrefTopN] = useState(5);
+
+      // Loading copy states
+      const [loadingMessage, setLoadingMessage] = useState('Finding matching restaurants...');
+      
+      // Recommendation Results
+      const [aiSummary, setAiSummary] = useState('');
+      const [recommendations, setRecommendations] = useState([]);
+      const [metadata, setMetadata] = useState({});
+
+      const API_BASE = `${window.location.origin}`;
+
+      // Fetch autocompletions metadata on mount
+      useEffect(() => {
+        fetch(`${API_BASE}/api/v1/metadata/locations`)
+          .then(res => res.json())
+          .then(data => setLocationsList(data))
+          .catch(e => console.error("Failed to load locations", e));
+
+        fetch(`${API_BASE}/api/v1/metadata/cuisines`)
+          .then(res => res.json())
+          .then(data => setCuisinesList(data))
+          .catch(e => console.error("Failed to load cuisines", e));
+      }, []);
+
+      // Timed Rotating Loading Messages
+      useEffect(() => {
+        if (screenState !== 'LOADING') return;
+        const messages = [
+          'Finding matching restaurants...',
+          'Analyzing ratings and reviews...',
+          'Running local vector semantic matches...',
+          'AI is ranking your best grounded options...'
+        ];
+        let index = 0;
+        const interval = setInterval(() => {
+          index = (index + 1) % messages.length;
+          setLoadingMessage(messages[index]);
+        }, 2000);
+        return () => clearInterval(interval);
+      }, [screenState]);
+
+      // Preset Applicator
+      const applyPreset = (cuisine, budget, rating, vibes) => {
+        setPrefLocation('Indiranagar'); // Default matching location in dataset
+        setPrefCuisine(cuisine);
+        setPrefBudget(budget);
+        setPrefMinRating(rating);
+        setPrefAdditional(vibes);
+        setPrefTopN(3); // Presets show top 3 recommendations
+        
+        triggerSearch({
+          location: 'Indiranagar',
+          cuisine,
+          budget,
+          min_rating: rating,
+          additional_preferences: vibes,
+          top_n: 3
+        });
+      };
+
+      // Submit preferences to FastAPI Orchestrator
+      const handleSubmit = (e) => {
+        if (e) e.preventDefault();
+        
+        if (!prefLocation) {
+          alert("Please select a location!");
+          return;
+        }
+        if (!prefCuisine) {
+          alert("Please select a cuisine!");
+          return;
+        }
+
+        triggerSearch({
+          location: prefLocation,
+          cuisine: prefCuisine,
+          budget: prefBudget,
+          min_rating: prefMinRating,
+          additional_preferences: prefAdditional || null,
+          top_n: prefTopN
+        });
+      };
+
+      const triggerSearch = (payload) => {
+        setScreenState('LOADING');
+        
+        fetch(`${API_BASE}/api/v1/recommendations`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(async (res) => {
+          if (!res.ok) {
+            throw new Error(await res.text());
+          }
+          return res.json();
+        })
+        .then((data) => {
+          if (!data.recommendations || data.recommendations.length === 0) {
+            setScreenState('EMPTY');
+          } else {
+            setAiSummary(data.summary);
+            setRecommendations(data.recommendations);
+            setMetadata(data.meta || {});
+            setScreenState('RESULTS');
+          }
+        })
+        .catch((err) => {
+          console.error("Discovery error", err);
+          setScreenState('ERROR');
+        });
+      };
+
+      const getGridClass = () => {
+        const count = recommendations.length;
+        if (count === 1) return 'grid-cols-1 max-w-4xl mx-auto w-full';
+        if (count === 2) return 'grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto w-full';
+        if (count === 3) return 'grid-cols-1 md:grid-cols-3 max-w-6xl mx-auto w-full';
+        if (count === 4) return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto w-full';
+        return 'grid-cols-1 md:grid-cols-2 lg:grid-cols-5 max-w-7xl mx-auto w-full';
+      };
+
+      return (
+        <div className={`flex flex-col justify-between bg-background transition-all duration-300 ${
+          ['SEARCH', 'LOADING', 'EMPTY', 'ERROR'].includes(screenState) 
+            ? 'h-screen overflow-hidden' 
+            : 'min-h-screen lg:h-screen lg:overflow-hidden'
+        }`}>
+          {/* Header */}
+          <header className="sticky top-0 w-full z-50 bg-[#0e1111] backdrop-blur-md flex-shrink-0">
+            <div className="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-stack-md max-w-container-max mx-auto">
+              <div 
+                className="font-hero-lg-mobile text-hero-lg-mobile font-bold text-primary cursor-pointer select-none"
+                onClick={() => setScreenState('SEARCH')}
+              >
+                TasteFinder AI
+              </div>
+              <div className="flex gap-2 items-center text-primary font-medium">
+                <span className="material-symbols-outlined">location_on</span>
+                <span className="font-body-md">{prefLocation || 'Bangalore'}</span>
+              </div>
+            </div>
+          </header>
+
+          {/* Active Filters Sticky Bar (Only in results view) */}
+          {screenState === 'RESULTS' && (
+            <div className="sticky top-[80px] z-40 bg-[#0e1111] backdrop-blur-md py-2 px-margin-mobile md:px-margin-desktop flex-shrink-0">
+              <div className="max-w-container-max mx-auto flex items-center gap-3 overflow-x-auto no-scrollbar">
+                <span className="font-label-sm text-label-sm text-on-surface-variant flex-shrink-0">Active Filters:</span>
+                <div className="flex gap-2">
+                  <div className="bg-[#0e1111] text-[#d4a825] font-label-sm text-label-sm px-4 py-1.5 rounded-full whitespace-nowrap border border-[#d4a825]/20 flex items-center gap-1">
+                    {prefLocation}
+                  </div>
+                  <div className="bg-[#0e1111] text-[#d4a825] font-label-sm text-label-sm px-4 py-1.5 rounded-full whitespace-nowrap border border-[#d4a825]/20 flex items-center gap-1">
+                    {prefCuisine}
+                  </div>
+                  <div className="bg-[#0e1111] text-[#d4a825] font-label-sm text-label-sm px-4 py-1.5 rounded-full whitespace-nowrap border border-[#d4a825]/20 flex items-center gap-1">
+                    {prefBudget.toUpperCase()} Budget
+                  </div>
+                  <div className="bg-[#0e1111] text-[#d4a825] font-label-sm text-label-sm px-4 py-1.5 rounded-full whitespace-nowrap border border-[#d4a825]/20 flex items-center gap-1">
+                    ★ {prefMinRating.toFixed(1)}+
+                  </div>
+                  <div className="bg-[#0e1111] text-[#d4a825] font-label-sm text-label-sm px-4 py-1.5 rounded-full whitespace-nowrap border border-[#d4a825]/20 flex items-center gap-1">
+                    🍽️ {prefTopN} Match{prefTopN > 1 ? 'es' : ''}
+                  </div>
+                </div>
+                <button 
+                  className="ml-auto font-label-sm text-label-sm text-[#d4a825] hover:text-[#f0d060] hover:underline flex-shrink-0 font-bold transition-colors"
+                  onClick={() => setScreenState('SEARCH')}
+                >
+                  Edit Search
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Main Container */}
+          <main className={`flex-grow ${
+            ['SEARCH', 'LOADING', 'EMPTY', 'ERROR'].includes(screenState) 
+              ? 'overflow-hidden flex flex-col py-2' 
+              : 'pb-6 flex flex-col justify-start lg:overflow-hidden lg:pb-0'
+          }`}>
+            
+            {/* 1. SEARCH VIEW */}
+            {screenState === 'SEARCH' && (
+              <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full flex flex-col lg:flex-row gap-6 lg:gap-12 items-center justify-center my-auto py-2 md:py-4 overflow-visible">
+                
+                {/* Left side text and decors */}
+                <div className="w-full lg:w-5/12 flex flex-col gap-2 md:gap-4 z-10 text-center lg:text-left pt-1 lg:pt-0">
+                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-on-surface leading-tight font-Outfit">
+                    Better food decisions powered by <span className="text-[#d4a825] font-bold">AI</span>
+                  </h1>
+                  <p className="hidden md:block text-sm md:text-base text-on-surface-variant max-w-md mx-auto lg:mx-0">
+                    Provide your craving, location, quality constraints, and unique vibe. Our engine vectorizes your search locally and orchestrates Groq AI to deliver grounded, explainable recommendations without scrolling.
+                  </p>
+                  <div className="hidden lg:flex items-center gap-3 text-[#d4a825] mt-4 bg-[#0e1111] border border-[#d4a825]/20 px-4 py-3 rounded-xl max-w-[280px]">
+                    <span className="material-symbols-outlined text-xl flex-shrink-0" style={{fontVariationSettings: "'FILL' 1"}}>auto_awesome</span>
+                    <div className="text-left">
+                      <div className="text-[11px] font-bold uppercase tracking-wider leading-tight">Grounded Vector Search</div>
+                      <div className="text-[10px] font-semibold uppercase tracking-wider text-[#b5b5be] leading-none mt-0.5">Strict Viewport Bounds</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right side form card */}
+                <div className="w-full lg:w-7/12 bg-[#0e1111] rounded-card shadow-ambient p-5 md:p-6 relative z-20 transition-all duration-300 hover:shadow-hover overflow-visible search-card-fit custom-scrollbar border border-[#2a2a30]">
+                  <form onSubmit={handleSubmit} className="flex flex-col gap-3 search-form-fit">
+                    
+                    {/* Location Dropdown Input */}
+                    <SearchableDropdown
+                      label="Where are you looking?"
+                      value={prefLocation}
+                      onChange={setPrefLocation}
+                      options={locationsList}
+                      placeholder="e.g. Indiranagar, Koramangala, BTM Layout..."
+                      icon="location_on"
+                    />
+
+                    {/* Cuisine Dropdown Input */}
+                    <SearchableDropdown
+                      label="Cuisine or Dish"
+                      value={prefCuisine}
+                      onChange={setPrefCuisine}
+                      options={cuisinesList}
+                      placeholder="e.g. North Indian, Italian, Chinese..."
+                      icon="restaurant"
+                    />    
+                      {/* Top 3 Most Searched Cuisines */}
+                      <div className="flex flex-wrap gap-2 items-center mt-2.5 search-cuisine-chips">
+                        <span className="text-[12px] font-bold text-on-surface-variant uppercase tracking-wider mr-1.5 flex items-center gap-1 select-none">
+                          <span className="material-symbols-outlined text-[14px] text-[#d4a825]" style={{fontVariationSettings: "'FILL' 1"}}>trending_up</span>
+                          Top Cuisines:
+                        </span>
+                        {['North Indian', 'Chinese', 'South Indian'].map(c => (
+                          <button 
+                            key={c}
+                            type="button"
+                            onClick={() => setPrefCuisine(c)}
+                            className={`chip-radius px-4 py-2 font-label-sm text-label-sm border transition-all duration-200 ${
+                              prefCuisine === c 
+                                ? 'bg-[#8B0000] text-white border-[#d4a825]/30 font-semibold shadow-sm scale-105' 
+                                : 'bg-[#0e1111] border border-[#2a2a30] text-on-surface-variant font-medium hover:bg-[#1a1d1d] hover:text-[#d4a825] hover:border-[#d4a825]/30'
+                            }`}
+                          >
+                            {c}
+                          </button>
+                        ))}
+                      </div>
+
+                    <div className="flex flex-col md:flex-row gap-4">
+                      {/* Budget Selector */}
+                      <div className="flex flex-col gap-1 w-full md:w-[24%]">
+                        <label className="font-label-sm text-label-sm text-on-surface h-[36px] flex items-end pb-1">Budget</label>
+                        <div className="flex rounded-lg overflow-hidden border border-[#2a2a30] bg-[#0e1111]">
+                          {['low', 'medium', 'high'].map(b => (
+                            <button
+                              key={b}
+                              type="button"
+                              onClick={() => setPrefBudget(b)}
+                              className={`flex-1 py-1.5 font-label-sm text-label-sm border-r border-[#2a2a30] last:border-0 transition-colors ${
+                                prefBudget === b
+                                  ? 'bg-[#2a0000] text-[#d4a825] font-semibold shadow-inner'
+                                  : 'text-on-surface-variant hover:bg-[#1a1d1d]'
+                                }`}
+                            >
+                              {b.charAt(0).toUpperCase() + b.slice(1)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Minimum Rating Constraint Slider */}
+                      <div className="flex flex-col gap-1 w-full md:w-[35%]">
+                        <label className="flex justify-between items-end font-label-sm text-label-sm text-on-surface h-[36px] pb-1">
+                          <span className="leading-none">Minimum Rating</span>
+                          <span className="font-bold flex items-center gap-1 leading-none">
+                            <span className="material-symbols-outlined text-[#d4a825] text-sm" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                            <span className="text-[#d4a825] leading-none">{prefMinRating.toFixed(1)}+</span>
+                          </span>
+                        </label>
+                        <div className="h-[32px] flex items-center">
+                          <input 
+                            type="range"
+                            min="3.0"
+                            max="5.0"
+                            step="0.1"
+                            value={prefMinRating}
+                            onChange={(e) => setPrefMinRating(parseFloat(e.target.value))}
+                            className="w-full rounded-full cursor-pointer"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Capacity constraint N */}
+                      <div className="flex flex-col gap-1 w-full md:w-[41%]">
+                        <label className="flex justify-between items-end font-label-sm text-label-sm text-on-surface h-[36px] pb-1">
+                          <span className="leading-tight">How many recommendations?</span>
+                          <span className="font-bold flex items-center gap-1 text-[#d4a825] flex-shrink-0 ml-2 leading-none">
+                            <span className="material-symbols-outlined text-xs" style={{fontVariationSettings: "'FILL' 1"}}>restaurant_menu</span>
+                            <span className="leading-none">{prefTopN} Match{prefTopN > 1 ? 'es' : ''}</span>
+                          </span>
+                        </label>
+                        <div className="h-[32px] flex items-center">
+                          <input 
+                            type="range"
+                            min="1"
+                            max="5"
+                            step="1"
+                            value={prefTopN}
+                            onChange={(e) => setPrefTopN(parseInt(e.target.value))}
+                            className="w-full rounded-full cursor-pointer"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Unstructured qualitative inputs */}
+                    <div className="flex flex-col gap-1">
+                      <label className="font-label-sm text-label-sm text-on-surface">Any specific vibes?</label>
+                      <input 
+                        type="text"
+                        value={prefAdditional}
+                        onChange={(e) => setPrefAdditional(e.target.value)}
+                        placeholder="e.g. cozy rooftop ambience, authentic handmade pasta..."
+                        className="w-full input-radius border border-[#2a2a30] bg-[#0e1111] px-4 py-2 search-input-fit font-body-md text-body-md text-on-surface placeholder:text-white/50 focus:border-[#d4a825] focus:ring-1 focus:ring-[#d4a825]/50 outline-none transition-colors"
+                      />
+                    </div>
+
+                    {/* Recommendations trigger */}
+                    <button 
+                      type="submit"
+                      className="w-full h-[44px] search-btn-fit rounded-lg font-label-sm text-label-sm font-bold mt-1 hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-white bg-[#8B0000] border border-[#d4a825]/20"
+                    >
+                      <span className="material-symbols-outlined" style={{fontVariationSettings: "'FILL' 1"}}>auto_awesome</span>
+                      Get AI Recommendations
+                    </button>
+                  </form>
+
+                  {/* Preset Suggestions */}
+                  <div className="mt-3 pt-2.5 search-preset-fit">
+                    <div className="font-label-sm text-label-sm font-semibold text-[#d4a825] mb-1.5 tracking-wide uppercase flex items-center gap-1.5 select-none">
+                      <span className="material-symbols-outlined text-[15px] text-[#d4a825]" style={{fontVariationSettings: "'FILL' 1"}}>tips_and_updates</span>
+                      <span className="preset-title">AI Quick Cravings Presets</span>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <button 
+                        onClick={() => applyPreset('Italian', 'high', 4.2, 'High-end elegant setting, romantic outdoor vibe, delicious lasagna.')}
+                        className="flex flex-col items-center justify-center text-center p-3 bg-[#0e1111] hover:bg-[#1a1d1d] border border-[#2a2a30] hover:border-[#d4a825]/35 rounded-xl font-label-sm text-label-sm transition-all preset-btn-fit"
+                      >
+                        <span className="preset-icon text-xl mb-1">🌹</span>
+                        <span className="font-semibold text-on-surface">Date Night</span>
+                      </button>
+                      <button 
+                        onClick={() => applyPreset('Cafe', 'medium', 4.0, 'Cozy study spot, fantastic filter coffee, fresh croissants.')}
+                        className="flex flex-col items-center justify-center text-center p-3 bg-[#0e1111] hover:bg-[#1a1d1d] border border-[#2a2a30] hover:border-[#d4a825]/35 rounded-xl font-label-sm text-label-sm transition-all preset-btn-fit"
+                      >
+                        <span className="preset-icon text-xl mb-1">☕</span>
+                        <span className="font-semibold text-on-surface">Work & Coffee</span>
+                      </button>
+                      <button 
+                        onClick={() => applyPreset('Desserts', 'low', 4.0, 'Gelato or waffle spot, late night.')}
+                        className="flex flex-col items-center justify-center text-center p-3 bg-[#0e1111] hover:bg-[#1a1d1d] border border-[#2a2a30] hover:border-[#d4a825]/35 rounded-xl font-label-sm text-label-sm transition-all preset-btn-fit"
+                      >
+                        <span className="preset-icon text-xl mb-1">🍧</span>
+                        <span className="font-semibold text-on-surface">Late Sweet</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 2. LOADING STATE */}
+            {screenState === 'LOADING' && (
+              <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full z-10 relative my-auto">
+                <div className="text-center mb-stack-lg h-12 flex items-center justify-center relative">
+                  <span className="material-symbols-outlined text-primary mr-3 animate-spin text-3xl">auto_awesome</span>
+                  <p className="font-card-title text-card-title text-on-surface font-semibold animate-pulse">
+                    {loadingMessage}
+                  </p>
+                </div>
+
+                {/* Shimmer skeleton banner */}
+                <div className="bg-surface-container-low rounded-card p-stack-md md:p-gutter mb-stack-xl shadow-ambient border border-outline-variant/30 max-w-4xl mx-auto">
+                  <div className="flex items-start space-x-4">
+                    <div className="shimmer-wrapper w-10 h-10 rounded-full flex-shrink-0"></div>
+                    <div className="flex-grow space-y-3">
+                      <div className="shimmer-wrapper h-6 w-1/3 rounded-md"></div>
+                      <div className="shimmer-wrapper h-4 w-full rounded-md"></div>
+                      <div className="shimmer-wrapper h-4 w-5/6 rounded-md"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 3. RESULTS VIEW (Adaptive Zero-Scroll viewport layout) */}
+            {screenState === 'RESULTS' && (
+              <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full flex-grow flex flex-col overflow-y-auto custom-scrollbar pr-1 max-h-[calc(100vh-210px)] py-2 results-container-fit my-auto">
+                {aiSummary && (
+                  <div className="bg-[#0e1111] rounded-xl py-2.5 px-4 mb-3 max-w-6xl mx-auto w-full flex items-center gap-3 border border-[#d4a825]/15">
+                    <span className="material-symbols-outlined text-[#d4a825] text-2xl" style={{fontVariationSettings: "'FILL' 1"}}>auto_awesome</span>
+                    <p className="text-sm font-medium text-on-surface leading-relaxed">
+                      {aiSummary}
+                    </p>
+                  </div>
+                )}
+
+                <div className="w-full flex flex-col overflow-hidden">
+                  <div className="flex flex-wrap gap-4 justify-center items-stretch max-w-6xl mx-auto w-full">
+                    {recommendations.map((rec, index) => {
+                      const res = rec.restaurant;
+                      const isTop = index === 0;
+
+                      const cardLayoutClass = "rounded-xl overflow-hidden transition-all duration-300 flex flex-col relative group hover:scale-[1.005] w-[230px] h-[310px] justify-between";
+                      const imageContainerClass = "w-full h-28 relative flex-shrink-0";
+                      const contentContainerClass = "w-full p-3 flex flex-col justify-start flex-grow gap-2";
+
+                      return (
+                        <article key={res.id} className={cardLayoutClass} style={{background: '#0e1111', border: '1px solid #2a2a30'}}>
+                          {/* Rank badge */}
+                          <div className={`absolute top-3 left-3 z-10 font-label-sm text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 border ${
+                            isTop 
+                              ? 'text-[#050507] font-bold' 
+                              : 'bg-[#0e0e12] text-[#d4a825] border-[#d4a825]/25 font-semibold'
+                          }`} style={isTop ? {background: '#d4a825', borderColor: '#d4a825', boxShadow: '0 0 14px rgba(212,168,37,0.4)'} : {}}>
+                            {isTop ? (
+                              <>
+                                <span className="material-symbols-outlined text-[13px]" style={{fontVariationSettings: "'FILL' 1"}}>trophy</span>
+                                #1 TOP MATCH
+                              </>
+                            ) : (
+                              <>
+                                <span className="material-symbols-outlined text-[13px]" style={{fontVariationSettings: "'FILL' 1"}}>stars</span>
+                                MATCH #{index + 1}
+                              </>
+                            )}
+                          </div>
+
+                          {/* Image */}
+                          <div className={imageContainerClass}>
+                            <img 
+                              className="w-full h-full object-cover" 
+                              src={getCuisineImage(res.cuisines)} 
+                              alt={res.name}
+                            />
+                          </div>
+
+                          {/* Details Content box */}
+                          <div className={contentContainerClass}>
+                            <div>
+                              <div className="flex justify-between items-start gap-1 mb-1">
+                                <h2 className="font-bold text-on-surface text-base line-clamp-1" title={res.name}>
+                                  {res.name}
+                                </h2>
+                                <div className="bg-[#d4a825]/10 border border-[#d4a825]/20 px-2 py-0.5 rounded-lg flex items-center gap-1 flex-shrink-0">
+                                  <span className="font-semibold text-xs text-[#d4a825]">{res.rating.toFixed(1)}</span>
+                                  <span className="material-symbols-outlined text-[#d4a825] text-[12px]" style={{fontVariationSettings: "'FILL' 1"}}>star</span>
+                                </div>
+                              </div>
+
+                              <div className="flex flex-wrap gap-1 mb-1">
+                                <span className="text-[9px] text-[#b5b5be] bg-[#0e1111] border border-[#2a2a30] px-1.5 py-0.5 rounded">
+                                  💰 ₹{res.estimated_cost}
+                                </span>
+                                <span className="text-[9px] text-[#b5b5be] bg-[#0e1111] border border-[#2a2a30] px-1.5 py-0.5 rounded">
+                                  📍 {res.location}
+                                </span>
+                                <span className="text-[9px] text-[#b5b5be] bg-[#0e1111] border border-[#2a2a30] px-1.5 py-0.5 rounded line-clamp-1 max-w-[90px]" title={res.cuisines[0]}>
+                                  🍽️ {res.cuisines[0]}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Generative AI Explanation (Grounding rationale) */}
+                            <div className="flex items-center gap-1.5 text-[#d4a825] bg-[#d4a825]/5 border border-[#d4a825]/10 py-1.5 px-2.5 rounded-lg text-[9.5px] font-medium leading-none w-full select-none">
+                              <span className="material-symbols-outlined text-[13px] flex-shrink-0" style={{fontVariationSettings: "'FILL' 1"}}>auto_awesome</span>
+                              <span className="truncate w-full block text-left" title={rec.explanation}>
+                                {rec.explanation}
+                              </span>
+                            </div>
+
+                            {/* Actions */}
+                            <div className="w-full mt-auto">
+                              <button 
+                                onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(res.name + ' ' + res.location)}`, '_blank')}
+                                className="w-full rounded-lg hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 font-semibold h-[32px] text-xs text-white bg-[#8B0000] border border-[#d4a825]/15"
+                              >
+                                <span className="material-symbols-outlined text-[15px]">directions</span> Get Directions
+                              </button>
+                            </div>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 4. EMPTY RESULTS STATE */}
+            {screenState === 'EMPTY' && (
+              <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full flex-grow flex flex-col items-center justify-center text-center py-stack-xl my-auto">
+                <div className="w-24 h-24 mb-stack-md bg-[#0e1111] rounded-full flex items-center justify-center overflow-hidden border border-[#2a2a30]">
+                  <span className="material-symbols-outlined text-[#b5b5be] text-[40px]">search_off</span>
+                </div>
+                <h2 className="font-card-title text-card-title font-bold text-on-surface mb-stack-sm">No matching restaurants</h2>
+                <p className="font-body-md text-body-md text-[#b5b5be] mb-stack-lg max-w-sm">
+                  Try broadening your location area, reducing rating caps, or adjusting budget constraints.
+                </p>
+                <button 
+                  onClick={() => setScreenState('SEARCH')}
+                  className="h-[44px] rounded-lg px-8 font-label-sm text-label-sm hover:opacity-90 transition-opacity flex items-center gap-2 font-bold text-white bg-[#8B0000] border border-[#d4a825]/15"
+                >
+                  <span className="material-symbols-outlined">tune</span>
+                  Adjust Filters
+                </button>
+              </div>
+            )}
+
+            {/* 5. ERROR STATE */}
+            {screenState === 'ERROR' && (
+              <div className="px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto w-full flex-grow flex flex-col items-center justify-center text-center py-stack-xl my-auto">
+                <div className="w-20 h-20 mb-stack-md bg-error-container text-on-error-container rounded-full flex items-center justify-center shadow-sm">
+                  <span className="material-symbols-outlined text-[40px]" style={{fontVariationSettings: "'FILL' 1"}}>error</span>
+                </div>
+                <h2 className="font-card-title text-card-title font-bold text-on-surface mb-stack-sm">Something went wrong</h2>
+                <p className="font-body-md text-body-md text-[#b5b5be] mb-stack-lg max-w-xs">
+                  We encountered an issue during recommendation analysis. Please check your connection or LLM model tokens.
+                </p>
+                <button 
+                  onClick={() => setScreenState('SEARCH')}
+                  className="h-[44px] rounded-lg px-10 font-label-sm text-label-sm hover:opacity-90 transition-all flex items-center gap-2 font-bold text-white bg-[#8B0000] border border-[#d4a825]/15"
+                >
+                  <span className="material-symbols-outlined">refresh</span>
+                  Try Again
+                </button>
+              </div>
+            )}
+            
+          </main>
+
+          {/* Footer */}
+          <footer className="w-full py-3 flex-shrink-0 bg-[#0e1111]">
+            <div className="flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto gap-4">
+              <div className="font-card-title text-base font-bold text-on-surface">TasteFinder AI</div>
+              <div className="flex flex-wrap justify-center gap-6">
+                <a className="text-[11px] text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+                <a className="text-[11px] text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+                <a className="text-[11px] text-on-surface-variant hover:text-primary transition-colors" href="#">Contact Us</a>
+                <a className="text-[11px] text-on-surface-variant hover:text-primary transition-colors" href="#">About AI Discovery</a>
+              </div>
+              <div className="text-[11px] text-on-surface-variant">
+                © 2026 TasteFinder AI by Zomato. All rights reserved.
+              </div>
+            </div>
+          </footer>
+        </div>
+      );
+    }
+
+    // Render the React application
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+</body>
+</html>

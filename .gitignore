@@ -1,0 +1,21 @@
+# Streamlit secrets (local dev only — never commit)
+.streamlit/secrets.toml
+
+# Virtual environment
+venv/
+
+# Python caches
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment file with real keys
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS artifacts
+Thumbs.db
+.DS_Store

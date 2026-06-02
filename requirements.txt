@@ -1,0 +1,15 @@
+pandas
+datasets
+pydantic
+pydantic-settings
+python-dotenv
+streamlit
+openai
+google-genai
+fastapi
+uvicorn
+groq
+transformers
+torch
+sentence-transformers
+numpy
