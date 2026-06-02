@@ -1,7 +1,7 @@
 import os
 import numpy as np
+import requests
 from typing import List
-from sentence_transformers import SentenceTransformer
 
 from app.config import settings
 from app.data.repository import RestaurantRepository
@@ -14,9 +14,8 @@ class VectorSearchEngine:
         self.db_dir = os.path.dirname(settings.absolute_data_path)
         self.vector_path = os.path.join(self.db_dir, "embeddings.npy")
         
-        # Load local model and embedding vectors
-        print(f"Loading local SentenceTransformer model '{self.model_name}' inside search engine...")
-        self.model = SentenceTransformer(self.model_name)
+        # We now vectorize using the Hugging Face Inference API, saving ~500MB of RAM!
+        print(f"Initialized lightweight search engine. Using Hugging Face Inference API for '{self.model_name}'.")
         
         if not os.path.exists(self.vector_path):
             raise FileNotFoundError(
@@ -37,9 +36,22 @@ class VectorSearchEngine:
             print("Qualitative preferences query is empty. Bypassing vector search and maintaining hierarchical ranking.")
             return candidates[:top_n]
 
-        # 2. Vectorize the query locally
+        # 2. Vectorize the query via Hugging Face Inference API (0MB local footprint!)
         query_text = query.strip()
-        query_vector = self.model.encode(query_text, convert_to_numpy=True)
+        print(f"Vectorizing query via Hugging Face Inference API: '{query_text}'...")
+        
+        api_url = f"https://api-inference.huggingface.co/models/{self.model_name}"
+        try:
+            response = requests.post(api_url, json={"inputs": query_text}, timeout=10)
+            if response.status_code == 200:
+                query_vector = np.array(response.json(), dtype=np.float32)
+            else:
+                print(f"Warning: Hugging Face API returned status {response.status_code}. Response: {response.text}")
+                # Fallback to zero vector of size 384 (dimension of all-MiniLM-L6-v2)
+                query_vector = np.zeros(384, dtype=np.float32)
+        except Exception as e:
+            print(f"Error vectorizing query via Hugging Face API: {e}")
+            query_vector = np.zeros(384, dtype=np.float32)
         
         # 3. Retrieve embedding indices for candidate subset
         candidate_ids = [c.id for c in candidates]

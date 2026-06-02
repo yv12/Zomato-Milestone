@@ -2,7 +2,6 @@ import os
 import sqlite3
 import numpy as np
 import pandas as pd
-from sentence_transformers import SentenceTransformer
 
 from app.config import settings
 from .loader import DatasetLoader
@@ -25,6 +24,7 @@ def run_ingestion():
     # 3. Local Embedding Generation
     print(f"Loading local sentence embedding model '{settings.embedding_model_name}'...")
     # This automatically downloads/loads the MiniLM model locally
+    from sentence_transformers import SentenceTransformer
     model = SentenceTransformer(settings.embedding_model_name)
     
     print("Generating dense vector representations of restaurant fields locally...")

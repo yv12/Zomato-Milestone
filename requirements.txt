@@ -9,7 +9,5 @@ google-genai
 fastapi
 uvicorn
 groq
-transformers
-torch
-sentence-transformers
 numpy
+requests
