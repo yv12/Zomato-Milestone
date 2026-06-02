@@ -105,7 +105,7 @@ st.markdown("""
         padding: 0;
         overflow: hidden;
         transition: transform 0.25s ease, box-shadow 0.25s ease;
-        height: 100%;
+        height: 480px; /* Force cards to have identical height */
         display: flex;
         flex-direction: column;
     }
@@ -137,8 +137,9 @@ st.markdown("""
     }
     .rec-card-meta {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap; /* Prevent chips from wrapping to two rows */
         gap: 6px;
+        overflow: hidden;
     }
     .rec-card-chip {
         font-size: 11px;
@@ -147,6 +148,7 @@ st.markdown("""
         border: 1px solid var(--border);
         padding: 3px 8px;
         border-radius: 6px;
+        white-space: nowrap; /* Keep chip contents on a single line */
     }
     .rec-card-explanation {
         font-size: 12px;
@@ -157,6 +159,22 @@ st.markdown("""
         padding: 8px 12px;
         border-radius: 10px;
         line-height: 1.45;
+        height: 110px; /* Fixed height for the AI explanation text block */
+        overflow-y: auto; /* Sleek scrolling if text exceeds height */
+    }
+    /* Elegant custom scrollbar for card explanation block */
+    .rec-card-explanation::-webkit-scrollbar {
+        width: 4px;
+    }
+    .rec-card-explanation::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .rec-card-explanation::-webkit-scrollbar-thumb {
+        background: rgba(212, 168, 37, 0.15);
+        border-radius: 4px;
+    }
+    .rec-card-explanation::-webkit-scrollbar-thumb:hover {
+        background: rgba(212, 168, 37, 0.3);
     }
     .rec-card-explanation::before {
         content: "✨ ";
@@ -207,7 +225,7 @@ st.markdown("""
         gap: 6px;
         width: 100%;
         padding: 8px 0;
-        margin-top: auto;
+        margin-top: auto; /* Crucial: pushes button to the absolute bottom of the card */
         background: var(--primary);
         color: #fff;
         border: 1px solid rgba(212, 168, 37, 0.15);
