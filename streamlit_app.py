@@ -541,14 +541,7 @@ def render_results(summary, rec_details, prefs):
         unsafe_allow_html=True,
     )
 
-    # AI Summary
-    if summary:
-        st.markdown(
-            f'<div class="ai-summary-banner">'
-            f'<span style="font-size:22px; flex-shrink:0;">✨</span>'
-            f'<span>{summary}</span></div>',
-            unsafe_allow_html=True,
-        )
+
 
     # Recommendation cards in a responsive grid
     count = len(rec_details)
